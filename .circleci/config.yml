@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: circleci/cpp:latest
+      - image: docker.io/library/cpp:latest
     environment:
       VCPKG_DEFAULT_TRIPLET: x64-linux
     steps:
