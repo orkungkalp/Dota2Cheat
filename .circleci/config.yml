@@ -2,41 +2,34 @@ version: 2.1
 
 jobs:
   build:
-    docker:
-      - image: circleci/cpp:latest
-    working_directory: /tmp
+    working_directory: /tmp/project
+    parallelism: 1
+    shell: /bin/bash --login
+
     steps:
       - checkout
-
-      # Install vcpkg dependencies
       - run:
-          name: Install vcpkg dependencies
+          name: Install dependencies
           command: |
-            git clone https://github.com/Microsoft/vcpkg.git /tmp/vcpkg
-            /tmp/vcpkg/bootstrap-vcpkg.sh
-            /tmp/vcpkg/vcpkg install protobuf:x64-linux
+            sudo apt-get update
+            sudo apt-get install -y build-essential
+            sudo apt-get install -y libprotobuf-dev protobuf-compiler
+            sudo apt-get install -y cmake
 
-      # Build the project
       - run:
-          name: Build
+          name: Build project
           command: |
             mkdir build
             cd build
             cmake ..
             make
-
-      # Create a binary artifact
-      - run:
-          name: Create a zip file
-          command: |
-            mkdir -p artifacts
-            zip -r artifacts/binary-artifact.zip /tmp/build/your-project-name
+            zip -r ../project.zip *
 
       - store_artifacts:
-          path: artifacts/binary-artifact.zip
-          destination: binary-artifact.zip
+          path: /tmp/project/project.zip
+          destination: project.zip
 
 workflows:
-  build-and-package:
+  build:
     jobs:
       - build
