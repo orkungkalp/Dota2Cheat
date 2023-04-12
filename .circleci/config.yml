@@ -26,9 +26,15 @@ jobs:
             make
 
       # Create a binary artifact
+      - run:
+          name: Create a zip file
+          command: |
+            mkdir -p artifacts
+            zip -r artifacts/binary-artifact.zip /tmp/build/your-project-name
+
       - store_artifacts:
-          path: /tmp/build/your-project-name
-          destination: binary-artifact
+          path: artifacts/binary-artifact.zip
+          destination: binary-artifact.zip
 
 workflows:
   build-and-package:
