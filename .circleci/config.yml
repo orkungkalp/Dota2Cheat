@@ -1,35 +1,22 @@
 version: 2.1
 
+executors:
+  cpp:
+    docker:
+      - image: circleci/cpp:latest
+
 jobs:
   build:
-    working_directory: /tmp/project
-    parallelism: 1
-    shell: /bin/bash --login
-
+    executor: cpp     # set executor to use CircleCI's pre-installed C++ environment
     steps:
       - checkout
       - run:
-          name: Install dependencies
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y build-essential
-            sudo apt-get install -y libprotobuf-dev protobuf-compiler
-            sudo apt-get install -y cmake
-
-      - run:
-          name: Build project
+          name: Build and Zip Project
           command: |
             mkdir build
             cd build
             cmake ..
             make
-            zip -r ../project.zip *
-
-      - store_artifacts:
-          path: /tmp/project/project.zip
-          destination: project.zip
-
-workflows:
-  build:
-    jobs:
-      - build
+            zip -r project.zip *
+            cp project.zip $CIRCLE_ARTIFACTS
+    working_directory: ~/repo
