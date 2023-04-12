@@ -40,3 +40,5 @@ workflows:
   say-hello-workflow:
     jobs:
       - say-hello
+artifacts:
+    - "program.jar"
