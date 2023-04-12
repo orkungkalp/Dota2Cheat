@@ -1,22 +1,40 @@
 version: 2.1
 
-executors:
-  cpp:
-    docker:
-      - image: circleci/cpp:latest
-
 jobs:
   build:
-    executor: cpp     # set executor to use CircleCI's pre-installed C++ environment
+    docker:
+      - image: circleci/cpp:latest
+    environment:
+      VCPKG_DEFAULT_TRIPLET: x64-linux
     steps:
       - checkout
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake
+          git clone https://github.com/Microsoft/vcpkg.git
+          ./vcpkg/bootstrap-vcpkg.sh
       - run:
-          name: Build and Zip Project
+          name: Install dependencies
+          command: |
+            ./vcpkg/vcpkg install protobuf
+      - run:
+          name: Build project
           command: |
             mkdir build
             cd build
-            cmake ..
+            cmake .. -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
             make
-            zip -r project.zip *
-            cp project.zip $CIRCLE_ARTIFACTS
-    working_directory: ~/repo
+      - run:
+          name: Package artifacts
+          command: |
+            mkdir artifacts
+            zip artifacts/output.zip build/*
+
+      - store_artifacts:
+          path: artifacts/output.zip
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build
